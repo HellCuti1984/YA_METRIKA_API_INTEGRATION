@@ -189,6 +189,8 @@ def api_v1_table(start_date_str, end_date_str):
     
     part = 1
     for da in direct_accs:
+        if part == 49:
+            print()
         print(f"Часть {part}/{len(direct_accs)}")
         #url_sources_direct_platforms = f"https://api-metrika.yandex.net/stat/v1/data?limit=10000&date1=2021-01-01&date2=2022-02-07&ids=86274673&dimensions=ym:ad:<attribution>DirectPlatform&direct_client_logins=tagil-319546-bspx&metrics=ym:ad:<currency>AdCost,ym:ad:<currency>AdCostPerVisit,ym:ad:clicks,ym:ad:visits"
         url_sources_direct_platforms = f"https://api-metrika.yandex.net/stat/v1/data?limit=10000&date1={start_date_str}&date2={end_date_str}&ids=86274673&dimensions=ym:ad:<attribution>DirectOrder,ym:ad:<attribution>DirectPlatform&direct_client_logins={da['direct_client_logins']}&metrics=ym:ad:<currency>AdCost,ym:ad:<currency>AdCostPerVisit,ym:ad:clicks,ym:ad:visits"
@@ -202,10 +204,13 @@ def api_v1_table(start_date_str, end_date_str):
         except Exception as ex:
             logging.critical(f'Ошибка{ex}')
         finally:
-            if len(url_sources_direct_platforms['data']) == 0:
-                logging.critical(f"Данных нет {da['direct_client_logins']} ===> Data == {len(url_sources_direct_platforms['data'])} !!!")
-            else:
-                db.req_query_get_data(query=query, sucs_msg=f"\nРек. кабинет {da['direct_client_logins']}\n")
+            try:
+                if len(url_sources_direct_platforms['data']) == 0:
+                    logging.critical(f"Данных нет {da['direct_client_logins']} ===> Data == {len(url_sources_direct_platforms['data'])} !!!")
+                else:
+                    db.req_query_get_data(query=query, sucs_msg=f"\nРек. кабинет {da['direct_client_logins']}\n")
+            except Exception as ex:
+                logging.critical(f"Проверьте верны ли данные аккаунта: {da['direct_client_logins']} - {da['token']} \n {url_sources_direct_platforms['code']}/{url_sources_direct_platforms['message']}")
         part += 1
 
 
